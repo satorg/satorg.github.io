@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #canvas {
+            border: 1px solid #9C9898;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="1200" height="800" onclick="onClick(event)">
+    Your browser does not support the HTML5 canvas tag.
+</canvas>
+<script type="text/javascript">
+
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    context.strokeStyle = "red";
+//    context.lineWidth = 5;
+
+    var maxRadius = 50;
+    var maxTime = 1500;
+    var clicks = [];
+
+    function onClick(event) {
+        var clientRect = canvas.getBoundingClientRect();
+
+        clicks.push({
+            x:event.clientX - clientRect.left,
+            y:event.clientY - clientRect.top,
+            t:new Date().getTime()
+        })
+    }
+
+    function drawCircle(x, y, ratio) {
+        var alpha = 1 - ratio
+        var radius = ratio * maxRadius
+
+        context.globalAlpha = alpha;
+        context.lineWidth = 5;
+        context.beginPath();
+        context.arc(x, y, radius, 0, 2 * Math.PI, false);
+        context.closePath();
+        context.stroke();
+    }
+
+    function animate() {
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        var time = new Date().getTime();
+        var i = 0;
+        while (i < clicks.length) {
+            var timeDiff = time - clicks[i].t;
+            var ratio = timeDiff / maxTime;
+            if (ratio > 1) {
+                clicks.shift()
+            } else {
+                var click = clicks[i++];
+                drawCircle(click.x, click.y, ratio);
+            }
+        }
+        requestAnimFrame(animate)
+    }
+
+    window.requestAnimFrame = (function (callback) {
+        return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function (callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+    })();
+
+    animate();
+
+</script>
+</body>
+</html>
